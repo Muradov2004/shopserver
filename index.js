@@ -280,6 +280,8 @@ let goods = [
   },
 ];
 
+
+
 let myBag = [];
 let orders = [];
 
@@ -288,6 +290,19 @@ goods = goods.map((item) => {
   let obj = { ...item, id: i++ };
   return obj;
 });
+
+let backup = [...goods]
+
+const refillGoods = () => {
+  goods = [...backup];
+};
+
+const restoreProducts = () => {
+  setTimeout(() => {
+    refillGoods();
+    console.log("Products restored.");
+  }, 5 * 60 * 1000); // 5 minutes in milliseconds
+};
 
 app.get("/goods", (req, res) => {
   res.json(goods);
@@ -330,7 +345,7 @@ app.delete("/delete-mybag/:id", (req, res) => {
 });
 
 app.delete("/delete-all-mybag", (req, res) => {
-  myBag = []; 
+  myBag = [];
   res.json(myBag);
 });
 
@@ -353,12 +368,14 @@ app.delete("/delete-admin/:id", (req, res) => {
   let name = goods.find((item) => id === item.id).product_name;
   goods = goods.filter((item) => id !== item.id);
   res.send(`Element ${name} was deleted from goods`);
+  restoreProducts();
 });
 
 app.post("/add-admin", (req, res) => {
   let obj = req.body;
   goods.push({ ...obj, id: i++ });
   res.send(`Element with ${obj.product_name} was added to goods`);
+  restoreProducts();
 });
 
 app.put("/change-admin/:id", (req, res) => {
@@ -366,6 +383,7 @@ app.put("/change-admin/:id", (req, res) => {
   let index = goods.findIndex((item) => id === item.id);
   goods[index] = req.body;
   res.send(`Element ${req.body.product_name} was changed`);
+  restoreProducts();
 });
 
 app.get("/search-goods/:searchValue", (req, res) => {
